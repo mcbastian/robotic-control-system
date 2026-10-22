@@ -117,8 +117,8 @@ public class TaskOperations implements TaskModeManagement {
 		ngat.rcs.RcsEnvironment.rebind("rmi://localhost/ModeManager", instance);
 
 		// why are these setup here ? 
-		RCS_SubsystemConnectionFactory.addSocketResource("BSS", "localhost", 6683);
-		RCS_SubsystemConnectionFactory.addSocketResource("ISS", "localhost", 7383);
+		RCS_SubsystemConnectionFactory.addSocketResource("BSS", System.getProperty("rcs.bss.host", "localhost"), Integer.getInteger("rcs.bss.port", 6683));
+		RCS_SubsystemConnectionFactory.addSocketResource("ISS", System.getProperty("rcs.iss.host", "localhost"), Integer.getInteger("rcs.iss.port", 7383));
 		
 	}
 
