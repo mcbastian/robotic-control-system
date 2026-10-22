@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import dev.lt.RATCamConfig;
+
 import ngat.icm.FilterDescriptor;
 import ngat.icm.FilterSet;
 import ngat.icm.Imager;
@@ -279,49 +279,7 @@ public class ConfigTranslator {
 
 			} else if (ximager.getInstrumentName().equalsIgnoreCase("RATCAM")) {
 
-				RATCamConfig ratcamConfig = new RATCamConfig(config.getName());
-				CCDDetector cdetector = (CCDDetector) ratcamConfig.getDetector(0);
-				cdetector.clearAllWindows();
-				cdetector.setXBin(xBin);
-				cdetector.setYBin(yBin);
-
-				// Instrument inst = Instruments.findInstrument("RATCAM");
-
-				// what if no fspec ?
-				if (filterSpec == null)
-					filterSpec = new XFilterSpec();
-
-				List filterList = filterSpec.getFilterList();
-
-				// what if no filters in fspec ?
-				if (filterList == null)
-					filterList = new Vector();
-
-				// 0 filters try clear/clear
-				// 1 filter try clear/f and f/clear
-				// 2 filters try f1/f2 and f2/f1
-				switch (filterList.size()) {
-				case 0:
-					if (tryRatcamConfig(ratcamConfig, "clear", "clear"))
-						return ratcamConfig;
-					break;
-				case 1:
-					String filter = ((XFilterDef) filterList.get(0)).getFilterName();
-					if (tryRatcamConfig(ratcamConfig, filter, "clear"))
-						return ratcamConfig;
-					if (tryRatcamConfig(ratcamConfig, "clear", filter))
-						return ratcamConfig;
-					break;
-				case 2:
-					String filter1 = ((XFilterDef) filterList.get(0)).getFilterName();
-					String filter2 = ((XFilterDef) filterList.get(1)).getFilterName();
-					if (tryRatcamConfig(ratcamConfig, filter1, filter2))
-						return ratcamConfig;
-					if (tryRatcamConfig(ratcamConfig, filter2, filter1))
-						return ratcamConfig;
-					break;
-				}
-				throw new ConfigTranslationException("Unable to convert or verify supplied RATCAM config: " + config);
+				throw new ConfigTranslationException("RATCAM unavailable: deployment dependency dev.lt.RATCamConfig is not supplied by this build");
 			}
 
 			throw new ConfigTranslationException("Unable to identify imager from supplied config: " + config);

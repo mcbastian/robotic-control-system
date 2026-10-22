@@ -191,15 +191,11 @@ public class ExposureTask extends ParallelTaskImpl {
 			InstrumentCalibrationProvider icp = ireg.getCalibrationProvider(instId);
 			InstrumentCalibration ical = icp.getCalibrationRequirements();
 			boolean dprt = ical.requiresRealTimeReduction();
-			if (dprt) {
-				taskLog.log(3, "Instrument requires DPRT reduction");
-				expTask.setDprt(true);
-			}
+			expTask.setDprt(dprt);
+			taskLog.log(3, "Instrument calibration policy: real-time reduction=" + dprt);
 		} catch (Exception e) {
-			e.printStackTrace();
-			// all that happens is the instrument will not DPRT the exposure -
-			// this may be ok
-			taskLog.log(1, "Unable to determine DPRT option for exposure, will not be reduced");
+			failed(660702, "Unable to determine instrument reduction policy", e);
+			return null;
 		}
 
 		// if (exposure instanceof XPeriodRunAtExposure) {
