@@ -158,7 +158,7 @@ public class OssStatusClient implements StatusMonitorClient {
 		status.setTimeStamp(now);
 		
 		try {
-			RemotelyPingable pinger = (RemotelyPingable)Naming.lookup(schedulerUrl);
+			RemotelyPingable pinger = (RemotelyPingable)ngat.rcs.RcsEnvironment.lookup(schedulerUrl);
 			pinger.ping();
 			status.setSchedulerOnline(true);
 			//System.err.println("OssStatusClient: " + name + " Scheduler is pingable");
@@ -169,7 +169,7 @@ public class OssStatusClient implements StatusMonitorClient {
 		boolean p2online = false;
 		String p2Url = baseModelUrlBase+"/Phase2Model";
 		try {
-			RemotelyPingable pinger = (RemotelyPingable)Naming.lookup(p2Url);
+			RemotelyPingable pinger = (RemotelyPingable)ngat.rcs.RcsEnvironment.lookup(p2Url);
 			pinger.ping();
 			//System.err.println("OssStatusClient: " + name + " Phase2Model is pingable");
 			p2online = true;
@@ -181,7 +181,7 @@ public class OssStatusClient implements StatusMonitorClient {
 		boolean accOnline = false;
 		String accUrl = baseModelUrlBase+"/ProposalAccountModel";
 		try {
-			RemotelyPingable pinger = (RemotelyPingable)Naming.lookup(accUrl);
+			RemotelyPingable pinger = (RemotelyPingable)ngat.rcs.RcsEnvironment.lookup(accUrl);
 			pinger.ping();
 			//System.err.println("OssStatusClient: " + name + " AccModel is pingable");
 			accOnline = true;
@@ -193,7 +193,7 @@ public class OssStatusClient implements StatusMonitorClient {
 		boolean histOnline = false;
 		String histUrl = baseModelUrlBase+"/HistoryModel";
 		try {
-			RemotelyPingable pinger = (RemotelyPingable)Naming.lookup(histUrl);
+			RemotelyPingable pinger = (RemotelyPingable)ngat.rcs.RcsEnvironment.lookup(histUrl);
 			pinger.ping();
 			//System.err.println("OssStatusClient: " + name + " HistModel is pingable");
 			histOnline = true;
@@ -206,7 +206,7 @@ public class OssStatusClient implements StatusMonitorClient {
 		}
 		
 		try {
-			RemotelyPingable pinger = (RemotelyPingable)Naming.lookup(synopticModelUrl);
+			RemotelyPingable pinger = (RemotelyPingable)ngat.rcs.RcsEnvironment.lookup(synopticModelUrl);
 			pinger.ping();
 			status.setSynopticModelsOnline(true);
 			//System.err.println("OssStatusClient: " + name + " SynopticModel is pingable");

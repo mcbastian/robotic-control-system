@@ -104,17 +104,17 @@ public class TaskOperations implements TaskModeManagement {
 				+ (current.isDaemon() ? "DAEMON" : "NON_DAEMON"));
 
 		//BasicExecTimingModel execModel = new BasicExecTimingModel();
-		//Naming.rebind("rmi://localhost/ExecTimingModel", execModel);
+		//ngat.rcs.RcsEnvironment.rebind("rmi://localhost/ExecTimingModel", execModel);
 
 		//BasicAvailabilityModel availModel = new BasicAvailabilityModel();
-		//Naming.rebind("rmi://localhost/AvailabilityModel", availModel);
+		//ngat.rcs.RcsEnvironment.rebind("rmi://localhost/AvailabilityModel", availModel);
 
 		// instance.createModeManager();
 		// Export server and bind
 		UnicastRemoteObject.exportObject(instance);
-		// Naming.rebind("rmi://localhost/ModeManager",
+		// ngat.rcs.RcsEnvironment.rebind("rmi://localhost/ModeManager",
 		// instance.getModeManager());
-		Naming.rebind("rmi://localhost/ModeManager", instance);
+		ngat.rcs.RcsEnvironment.rebind("rmi://localhost/ModeManager", instance);
 
 		// why are these setup here ? 
 		RCS_SubsystemConnectionFactory.addSocketResource("BSS", "localhost", 6683);
@@ -185,7 +185,7 @@ public class TaskOperations implements TaskModeManagement {
 		operationsManager = new OperationsManager("OCM");
 		UnicastRemoteObject.exportObject(operationsManager);
 
-		Naming.rebind("rmi://localhost/OperationsManager", operationsManager);
+		ngat.rcs.RcsEnvironment.rebind("rmi://localhost/OperationsManager", operationsManager);
 		tmmLog.log(1, CLASS, "TMM_Sequencer", "configureAgents", "Exported and bound OpsManager: " + operationsManager);
 
 		
@@ -299,7 +299,7 @@ public class TaskOperations implements TaskModeManagement {
 						// rmi export
 						UnicastRemoteObject.exportObject(dma);
 						// Bind this controller
-						Naming.rebind("rmi://localhost/" + agentId + "ModeController", dma);
+						ngat.rcs.RcsEnvironment.rebind("rmi://localhost/" + agentId + "ModeController", dma);
 
 					} catch (Exception ce) {
 						throw new IllegalArgumentException("Error binding ModeController: " + ce);
@@ -313,7 +313,7 @@ public class TaskOperations implements TaskModeManagement {
 		// operationsManager = new OperationsManager();
 		// UnicastRemoteObject.exportObject(operationsManager);
 
-		Naming.rebind("rmi://localhost/OperationsManager", operationsManager);
+		ngat.rcs.RcsEnvironment.rebind("rmi://localhost/OperationsManager", operationsManager);
 		tmmLog.log(1, CLASS, "TMM_Sequencer", "configureAgents", "Exported and bound OpsManager: " + operationsManager);
 
 		// start the OPS Mgr

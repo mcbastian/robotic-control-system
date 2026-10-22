@@ -215,7 +215,7 @@ public class CIL_ProxyHandler extends UnicastRemoteObject implements RequestHand
 		*/
 		
 		try {
-			CilService cil = (CilService)Naming.lookup("rmi://localhost/TCSCilService");	
+			CilService cil = (CilService)ngat.rcs.RcsEnvironment.lookup("rmi://localhost/TCSCilService");
 			cil.sendMessage(commandString, this, handlingTime);
 			
 		} catch (Exception e) {	

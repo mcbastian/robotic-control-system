@@ -93,7 +93,7 @@ public class RCS_CommandServer extends ControlThread implements Logging {
     @Override
 	public void initialise() {
 	try {
-	    serverSocket = new ServerSocket(port);
+	    serverSocket = new ServerSocket(port, 50, RcsEnvironment.bindAddress());
 	    traceLog.log(INFO, 5, CLASS, id, "init", "Opened server socket on port: "+port);
 	} catch (IOException iox) {
 	    errorLog.log(ERROR, 5, CLASS, id, "init", "Starting server: "+iox); 

@@ -549,7 +549,7 @@ public class RCS_Controller implements Logging {
 
 			// TODO #TNG# OperationsArchiveGateway oag = new
 			// OperationsArchiveGateway(opsMgr);
-			// Naming.rebind("OperationsGateway", oag);
+			// ngat.rcs.RcsEnvironment.rebind("OperationsGateway", oag);
 			// oag.startProcessor();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -578,7 +578,7 @@ public class RCS_Controller implements Logging {
 			DefaultGroupOperationsMonitor gom = controller.getGroupOperationsMonitor();
 			OperationsArchiveGateway oag = new OperationsArchiveGateway(opsMgr, gom);
 
-			Naming.rebind("OperationsGateway", oag);
+			ngat.rcs.RcsEnvironment.rebind("OperationsGateway", oag);
 			oag.setProcessInterval(10000L);
 			oag.setBackingStoreAgeLimit(10 * 60 * 1000L);
 			oag.startProcessor();
@@ -800,7 +800,7 @@ public class RCS_Controller implements Logging {
 			bwm.setGoodState("CLEAR");
 			bwm.setBadState("ALERT");
 			bwm.setKey("C:THREAT");
-			Naming.rebind("rmi://localhost:1099/WeatherMonitoring", bwm);
+			ngat.rcs.RcsEnvironment.rebind("rmi://localhost:1099/WeatherMonitoring", bwm);
 			System.err.println("Bound BasicWeatherMonitoring to registry");
 
 			(new Thread(bwm)).start();
@@ -1353,7 +1353,7 @@ public class RCS_Controller implements Logging {
 		// on previous lines other than the proxyserver which JMS needs.
 		CilService cil = null;
 		try {
-			DatagramSocket dsocket = new DatagramSocket(cilSendPort);
+			DatagramSocket dsocket = new DatagramSocket(cilSendPort, RcsEnvironment.bindAddress());
 			bootLog.log(1, CLASS, rcsId, "init", "CIL Socket bound to: " + cilSendPort);
 
 			Map registry = Collections.synchronizedMap(new HashMap());
@@ -1373,7 +1373,7 @@ public class RCS_Controller implements Logging {
 			server.setRxId(cilRxId);
 
 			bootLog.log(1, CLASS, rcsId, "init", "Binding cil server to local rmi registry: " + server);
-			Naming.rebind(cilServiceName, server);
+			ngat.rcs.RcsEnvironment.rebind(cilServiceName, server);
 			cil = server;
 			bootLog.log(1, CLASS, rcsId, "init", "Bound Cil service: [" + cilServiceName + "] on rmi port " + cilServicePort
 					+ "\n outgoing udp port: " + cilSendPort + "\n destination:       " + cilAddress + ":" + cilDestPort
@@ -1468,7 +1468,7 @@ public class RCS_Controller implements Logging {
 		// Engineering control server
 		cmdServer = null;
 
-		int cmdPort = 8221;
+		int cmdPort = rcs_config.getIntValue("rcs.text.port", 8221);
 		try {
 			cmdServer = new RCS_CommandServer("TEXT_SERVER", cmdPort);
 			bootLog.log(1, CLASS, rcsId, "init", "Control (TEXT) Server bound to port: " + cmdPort);
@@ -1533,7 +1533,7 @@ public class RCS_Controller implements Logging {
 		long duration = rcs_config.getLongValue("standards.duration", 15 * 60 * 1000L);
 		try {
 			telescope = new BasicTelescope();
-			XmlConfigurator.use(new File("/occ/rcs/telescope.xml")).configure(telescope);
+			XmlConfigurator.use(RcsEnvironment.file("/occ/rcs/telescope.xml")).configure(telescope);
 			bootLog.log(1, CLASS, rcsId, "init", "Telescope initialized.");
 
 			telescope.addTelescopeStatusUpdateListener(StatusPool.getInstance());
@@ -1559,15 +1559,15 @@ public class RCS_Controller implements Logging {
 				telescope.startMonitoringAutoguiderState(ag);
 			}
 
-			Naming.rebind("Telescope", telescope);
+			ngat.rcs.RcsEnvironment.rebind("Telescope", telescope);
 
-			Naming.rebind("TelescopeAlignmentAdjuster", bts.getAdjuster());
+			ngat.rcs.RcsEnvironment.rebind("TelescopeAlignmentAdjuster", bts.getAdjuster());
 
 			// TODO #TNG# TelescopeArchiveGateway tag = new
 			// TelescopeArchiveGateway(telescope);
 			// bootLog.log(1, CLASS, rcsId, "init",
 			// "Telescope Archive Gateway initialised");
-			// Naming.rebind("TelescopeGateway", tag);
+			// ngat.rcs.RcsEnvironment.rebind("TelescopeGateway", tag);
 			// tag.startProcessor();
 
 		} catch (Exception e) {
@@ -1786,8 +1786,8 @@ public class RCS_Controller implements Logging {
 		// ============================================================
 		try {
 			ireg = new BasicInstrumentRegistry();
-			XmlConfigurator.use(new File("/occ/rcs/ireg.xml")).configure(ireg);
-			Naming.rebind("InstrumentRegistry", ireg);
+			XmlConfigurator.use(RcsEnvironment.file("/occ/rcs/ireg.xml")).configure(ireg);
+			ngat.rcs.RcsEnvironment.rebind("InstrumentRegistry", ireg);
 			List ilist = ireg.listInstruments();
 			System.err.println("Created and bound instrument registry with " + (ilist == null ? "NO" : ilist.size())
 					+ " instruments");
@@ -1845,7 +1845,7 @@ public class RCS_Controller implements Logging {
 		try {
 			InstrumentArchiveGateway iag = new InstrumentArchiveGateway(ireg);
 			bootLog.log(1, CLASS, rcsId, "init", "Instrument Archive Gateway initialised");
-			Naming.rebind("InstrumentGateway", iag);
+			ngat.rcs.RcsEnvironment.rebind("InstrumentGateway", iag);
 			iag.setProcessInterval(10000L);
 			iag.setBackingStoreAgeLimit(10 * 60 * 1000L);
 
@@ -1978,14 +1978,14 @@ public class RCS_Controller implements Logging {
 		// SkyModel
 		try {
 			skyModel = new DefaultMutableSkyModel(8, 120000.0);
-			Naming.rebind("rmi://localhost:1099/SkyModel", skyModel);
+			ngat.rcs.RcsEnvironment.rebind("rmi://localhost:1099/SkyModel", skyModel);
 			bootLog.log(1, CLASS, rcsId, "init", "Bound SkyModel to local registry");
 
 			// TODO #TNG# SkyModelArchiveGateway sag = new
 			// SkyModelArchiveGateway((SkyModelMonitor) skyModel);
 			// bootLog.log(1, CLASS, rcsId, "init",
 			// "SkyModel Archive Gateway initialised");
-			// Naming.rebind("SkyModelGateway", sag);
+			// ngat.rcs.RcsEnvironment.rebind("SkyModelGateway", sag);
 			// sag.startProcessor();
 
 			// Make some sort of thing which is able to provide
@@ -2002,7 +2002,7 @@ public class RCS_Controller implements Logging {
 			// persist between restarts
 			// An external cronjob looks in the file every minute and updates
 			// the SkyModel photom state.
-			FileLogSkyListener flist = new FileLogSkyListener("/occ/data/photom.dat");
+			FileLogSkyListener flist = new FileLogSkyListener(RcsEnvironment.file("/occ/data/photom.dat").getPath());
 			((SkyModelMonitor) skyModel).addSkyModelUpdateListener(flist);
 
 		} catch (Exception ex) {
@@ -2026,7 +2026,7 @@ public class RCS_Controller implements Logging {
 		try {
 
 			meteo = new BasicMeteorologyProvider();
-			Naming.rebind("rmi://localhost:1099/Meteorology", meteo);
+			ngat.rcs.RcsEnvironment.rebind("rmi://localhost:1099/Meteorology", meteo);
 			bootLog.log(1, CLASS, rcsId, "init", "Bound MeteoProvider to local registry");
 
 			// link meteo provider to feed into SP
@@ -2037,7 +2037,7 @@ public class RCS_Controller implements Logging {
 			bootLog.log(1, CLASS, rcsId, "init", "METEO monitoring of WMS is started using CIL");
 
 			// monitor BCS
-			URL bcsUrl = new URL("file:///occ/data/cloud.dat");
+			URL bcsUrl = RcsEnvironment.file("/occ/data/cloud.dat").toURI().toURL();
 			meteo.startMonitoringBcs(bcsUrl);
 			bootLog.log(1, CLASS, rcsId, "init", "METEO monitoring of external CLOUD sensor is started using: " + bcsUrl);
 
@@ -2048,7 +2048,7 @@ public class RCS_Controller implements Logging {
 			LegacyStatusProviderRegistry.getInstance().addStatusCategory("CLOUD", bcsStatusProvider);
 
 			// monitor TNG Dust
-			URL dustUrl = new URL("file:///occ/data/tng_dust.dat");
+			URL dustUrl = RcsEnvironment.file("/occ/data/tng_dust.dat").toURI().toURL();
 			meteo.startMonitoringDust(dustUrl);
 			bootLog.log(1, CLASS, rcsId, "init", "METEO monitoring of external DUST sensor is started using: " + dustUrl);
 			// LEGACY Class which can provide TNG Dust status for the
@@ -2061,7 +2061,7 @@ public class RCS_Controller implements Logging {
 			// MeteorologyArchiveGateway(meteo);
 			// bootLog.log(1, CLASS, rcsId, "init",
 			// "Meteorology Archive Gateway initialised");
-			// Naming.rebind("MeteorologyGateway", mag);
+			// ngat.rcs.RcsEnvironment.rebind("MeteorologyGateway", mag);
 			// mag.startProcessor();
 
 		} catch (Exception ex) {
@@ -2077,7 +2077,7 @@ public class RCS_Controller implements Logging {
 			// create object for monitoring disk status
 			diskStatusProvider = new BasicDiskStatusProvider();
 			// add to RMI registry
-			Naming.rebind("rmi://localhost:1099/DiskStatus",diskStatusProvider);
+			ngat.rcs.RcsEnvironment.rebind("rmi://localhost:1099/DiskStatus",diskStatusProvider);
 			bootLog.log(1, CLASS, rcsId, "init", "Bound DiskStatusProvider to local registry");
 			// create legacy disk status provider, this is an interface between
 			// the new RMI-based system an older legacy systems
@@ -2116,7 +2116,7 @@ public class RCS_Controller implements Logging {
 
 			trs.startCacheReader();
 
-			Naming.rebind("rmi://localhost:1099/ReactiveSystem", trs);
+			ngat.rcs.RcsEnvironment.rebind("rmi://localhost:1099/ReactiveSystem", trs);
 			bootLog.log(1, CLASS, rcsId, "init", "Bound ReactiveSystem to local registry");
 		} catch (Exception e) {
 			bootLog.log(FATAL, 1, CLASS, rcsId, "init", "Error loading Reactive system: " + e);
@@ -2128,7 +2128,7 @@ public class RCS_Controller implements Logging {
 		/*try {
 			ReactiveSystemArchiveGateway rag = new ReactiveSystemArchiveGateway(trs);
 			bootLog.log(1, CLASS, rcsId, "init", "Reactive System Archive Gateway initialised");
-			Naming.rebind("ReactiveSystemGateway", rag);
+			ngat.rcs.RcsEnvironment.rebind("ReactiveSystemGateway", rag);
 			rag.setProcessInterval(10000L);
 			rag.setBackingStoreAgeLimit(10 * 60 * 1000L);
 			rag.startProcessor();
@@ -2142,7 +2142,7 @@ public class RCS_Controller implements Logging {
 
 		try {
 			gom = new DefaultGroupOperationsMonitor();
-			Naming.rebind("rmi://localhost:1099/GroupOperationsMonitor", gom);
+			ngat.rcs.RcsEnvironment.rebind("rmi://localhost:1099/GroupOperationsMonitor", gom);
 			bootLog.log(1, CLASS, rcsId, "init", "Bound GroupOperationsMonitor to local registry");
 		} catch (Exception ex) {
 			bootLog.log(FATAL, 1, CLASS, rcsId, "init", "Error initializing Group Operations Monitor : ", null, ex);
@@ -2155,7 +2155,7 @@ public class RCS_Controller implements Logging {
 
 		try {
 			bcalMonitor = new BasicCalibrationMonitor();
-			Naming.rebind("rmi://localhost:1099/CalibrationMonitor", bcalMonitor);
+			ngat.rcs.RcsEnvironment.rebind("rmi://localhost:1099/CalibrationMonitor", bcalMonitor);
 			bootLog.log(1, CLASS, rcsId, "init", "Bound CalibrationMonitor to local registry");
 		} catch (Exception ex) {
 			bootLog.log(FATAL, 1, CLASS, rcsId, "init", "Error initializing CalibrationMonitor: ", null, ex);
@@ -2174,7 +2174,7 @@ public class RCS_Controller implements Logging {
 
 		try {
 			bookingModel = new DefaultMutableAdvancedBookingModel();
-			Naming.rebind("rmi://localhost:1099/AdvancedBookingModel", bookingModel);
+			ngat.rcs.RcsEnvironment.rebind("rmi://localhost:1099/AdvancedBookingModel", bookingModel);
 			bootLog.log(1, CLASS, rcsId, "init", "Bound AdvancedBookingModel to local registry");
 		} catch (Exception ex) {
 			bootLog.log(FATAL, 1, CLASS, rcsId, "init", "Error starting up advanced booking model: ", null, ex);
@@ -2182,7 +2182,7 @@ public class RCS_Controller implements Logging {
 		}
 		try {
 			taskMonitor = new BasicTaskMonitor();
-			Naming.rebind("rmi://localhost:1099/TaskMonitor", taskMonitor);
+			ngat.rcs.RcsEnvironment.rebind("rmi://localhost:1099/TaskMonitor", taskMonitor);
 			bootLog.log(1, CLASS, rcsId, "init", "Bound TaskMonitor to local registry");
 			taskMonitor.startEventDespatcher();
 
@@ -2190,7 +2190,7 @@ public class RCS_Controller implements Logging {
 			 * try { TaskArchiveGateway tag = new
 			 * TaskArchiveGateway(taskMonitor); bootLog.log(1, CLASS, rcsId,
 			 * "init", "Task Archive Gateway initialised");
-			 * Naming.rebind("TaskGateway", tag);
+			 * ngat.rcs.RcsEnvironment.rebind("TaskGateway", tag);
 			 * tag.setProcessInterval(10000L); tag.setBackingStoreAgeLimit(10 *
 			 * 60 * 1000L); tag.startProcessor(); } catch (Exception iax) {
 			 * iax.printStackTrace(); }
@@ -2298,7 +2298,7 @@ public class RCS_Controller implements Logging {
 			// StatusPool.MECHANISMS_UPDATE_EVENT);
 
 			bootLog.log(1, CLASS, rcsId, "init", "Initialized axis tracking monitor");
-			Naming.rebind("rmi://localhost:1099/TrackingMonitor", defaultTrackingMonitor);
+			ngat.rcs.RcsEnvironment.rebind("rmi://localhost:1099/TrackingMonitor", defaultTrackingMonitor);
 			System.err.println("Bound axis tracking monitor to registry as TrackingMonitor");
 
 			telescope.addTelescopeStatusUpdateListener(defaultTrackingMonitor);
@@ -2321,7 +2321,7 @@ public class RCS_Controller implements Logging {
 			// StatusPool.MECHANISMS_UPDATE_EVENT);
 
 			bootLog.log(1, CLASS, rcsId, "init", "Initialized Autoguider monitor");
-			Naming.rebind("rmi://localhost:1099/AutoguiderMonitor", defaultAutoguiderMonitor);
+			ngat.rcs.RcsEnvironment.rebind("rmi://localhost:1099/AutoguiderMonitor", defaultAutoguiderMonitor);
 			System.err.println("Bound AutoguiderMonitor to registry");
 
 			telescope.addTelescopeStatusUpdateListener(defaultAutoguiderMonitor);
@@ -2348,7 +2348,7 @@ public class RCS_Controller implements Logging {
 			}
 
 			bootLog.log(1, CLASS, rcsId, "init", "Initialized Instrument monitor");
-			Naming.rebind("rmi://localhost:1099/InstrumentMonitor", defaultInstrumentMonitor);
+			ngat.rcs.RcsEnvironment.rebind("rmi://localhost:1099/InstrumentMonitor", defaultInstrumentMonitor);
 			System.err.println("Bound InstrumentMonitor to registry");
 
 		} catch (Exception e) {
@@ -2464,7 +2464,7 @@ public class RCS_Controller implements Logging {
 			tsmri.configure(tsmriConfigFile);
 
 			bootLog.log(1, CLASS, rcsId, "init", "Binding NEW statemodel...");
-			Naming.rebind("rmi://localhost/StateModel", tsm);
+			ngat.rcs.RcsEnvironment.rebind("rmi://localhost/StateModel", tsm);
 			bootLog.log(1, CLASS, rcsId, "init", "NEW StateModel bound");
 
 			// Link reactive trigger handler to the reactive system output
@@ -2475,7 +2475,7 @@ public class RCS_Controller implements Logging {
 			StateModelArchiveGateway smag = new StateModelArchiveGateway(tsm);
 			bootLog.log(1, CLASS, rcsId, "init", "Created StateModelArchive gateway and bound to stateModel");
 
-			Naming.rebind("StateModelGateway", smag);
+			ngat.rcs.RcsEnvironment.rebind("StateModelGateway", smag);
 			smag.setProcessInterval(10000L);
 			smag.setBackingStoreAgeLimit(10 * 60 * 1000L);
 			smag.startProcessor();

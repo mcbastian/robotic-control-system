@@ -101,7 +101,7 @@ public class TcsCilMonitor implements StatusMonitorClient, CilResponseHandler {
 	public void initClient() throws ClientInitializationException {
 		// TODO Auto-generated method stub
 		try {
-			cil = (CilService)Naming.lookup("rmi://localhost/TcsCilService");
+			cil = (CilService)ngat.rcs.RcsEnvironment.lookup("rmi://localhost/TcsCilService");
 		} catch (Exception e) { 		  
 		    throw new ClientInitializationException("TCSCilClient: Unable to access Cil service");
 		}

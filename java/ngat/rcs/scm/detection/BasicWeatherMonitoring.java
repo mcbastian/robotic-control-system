@@ -201,7 +201,7 @@ public class BasicWeatherMonitoring extends UnicastRemoteObject implements Weath
 			bwm.setBadState("ALERT");
 			bwm.setKey("C:THREAT");
 			System.err.println("Ready to Bind BasicWeatherMonitoring to local registry");
-			Naming.rebind("rmi://localhost:1099/WeatherMonitoring", bwm);
+			ngat.rcs.RcsEnvironment.rebind("rmi://localhost:1099/WeatherMonitoring", bwm);
 			System.err.println("Bound BasicWeatherMonitoring to registry");
 
 			(new Thread(bwm)).start();
