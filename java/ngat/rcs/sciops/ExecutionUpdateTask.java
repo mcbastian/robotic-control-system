@@ -24,11 +24,13 @@ public class ExecutionUpdateTask extends Default_TaskImpl {
 	private GroupItem group;
 	
 	private int vetoLevel;
+	private boolean reportedSuccess;
 	
 	public ExecutionUpdateTask(String name, TaskManager manager, GroupItem groupItem, boolean success,
 			IExecutionFailureContext efc, int vetoLevel) {
 		super(name, manager);	
-		this.group = group;
+		this.group = groupItem;
+		this.reportedSuccess = success;
 		this.efc = efc;
 		this.vetoLevel = vetoLevel;
 		try {
@@ -56,6 +58,15 @@ public class ExecutionUpdateTask extends Default_TaskImpl {
 	}
 
 	
+    /** Acknowledgement belongs to the wire task: an aborting parent deliberately
+     * suppresses its onSubTaskDone callback. This is not the group outcome. */
+    @Override
+    protected void onCompletion(ngat.message.base.COMMAND_DONE response) {
+        super.onCompletion(response);
+        System.err.println("RCS_HISTORY_ACK sequence="+manager.getManagerName()+" task="+name+
+            " group="+group.getID()+" history="+group.getHId()+" reportedSuccess="+reportedSuccess);
+    }
+
 	/**
 	 * @return the group
 	 */

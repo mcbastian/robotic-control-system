@@ -54,6 +54,8 @@ public class StandardStateModel extends UnicastRemoteObject implements
 	int axes = EnvironmentChangeEvent.AXES_ERROR;
 
 	int weather = EnvironmentChangeEvent.WEATHER_ALERT;
+    private final RequiredWeatherInputs requiredWeather = new RequiredWeatherInputs();
+    public RequiredWeatherInputs getRequiredWeatherInputs() { return requiredWeather; }
 
 	int enclosure = EnvironmentChangeEvent.ENCLOSURE_ERROR;
 
@@ -450,7 +452,7 @@ public class StandardStateModel extends UnicastRemoteObject implements
 			break;
 		case EnvironmentChangeEvent.WEATHER_ALERT:
 		case EnvironmentChangeEvent.WEATHER_CLEAR:
-			weather = type;
+			weather = (type == EnvironmentChangeEvent.WEATHER_CLEAR && !requiredWeather.ready()) ? EnvironmentChangeEvent.WEATHER_ALERT : type;
 			break;
 		case EnvironmentChangeEvent.CONTROL_DISABLED:
 		case EnvironmentChangeEvent.CONTROL_ENABLED:
@@ -531,6 +533,7 @@ public class StandardStateModel extends UnicastRemoteObject implements
 		// System.err.println("NSM::CheckTrans: CurrState="+state+" Timer elapsed: "+(timer.elapsed()/1000)+"s");
 
 		cycleNumber++;
+        if (!requiredWeather.ready()) weather = EnvironmentChangeEvent.WEATHER_ALERT;
 
 		// FIRST check the sun position
 		long now = System.currentTimeMillis();
@@ -579,6 +582,7 @@ public class StandardStateModel extends UnicastRemoteObject implements
 
 			if (intent == EnvironmentChangeEvent.INTENT_ENGINEERING) {
 				switchState(INIT_STATE);
+                return;
 			}
 
 			if (run != EnvironmentChangeEvent.OP_RUN) {
@@ -662,6 +666,7 @@ public class StandardStateModel extends UnicastRemoteObject implements
 			// --------
 			if (intent == EnvironmentChangeEvent.INTENT_ENGINEERING) {
 				switchState(INIT_STATE);
+                return;
 			}
 
 			if (run != EnvironmentChangeEvent.OP_RUN) {
@@ -696,6 +701,7 @@ public class StandardStateModel extends UnicastRemoteObject implements
 
 			if (intent == EnvironmentChangeEvent.INTENT_ENGINEERING) {
 				switchState(INIT_STATE);
+                return;
 			}
 			if (run != EnvironmentChangeEvent.OP_RUN) {
 				notifyListeners(new PowerDownAction(run));
@@ -737,6 +743,7 @@ public class StandardStateModel extends UnicastRemoteObject implements
 				notifyListeners(new FastAbortAction(AbortAction.ENG_REQUEST,
 						AbortAction.ENG_REQUEST_STR));
 				switchState(INIT_STATE);
+                return;
 			}
 
 			if (run != EnvironmentChangeEvent.OP_RUN) {
@@ -802,6 +809,7 @@ public class StandardStateModel extends UnicastRemoteObject implements
 			// System.err.println("NSM::CheckTrans: Test in CLOSING");
 			if (intent == EnvironmentChangeEvent.INTENT_ENGINEERING) {
 				switchState(INIT_STATE);
+                return;
 			}
 
 			if (run != EnvironmentChangeEvent.OP_RUN) {
@@ -828,6 +836,7 @@ public class StandardStateModel extends UnicastRemoteObject implements
 			// --------
 			if (intent == EnvironmentChangeEvent.INTENT_ENGINEERING) {
 				switchState(INIT_STATE);
+                return;
 			}
 			if (run != EnvironmentChangeEvent.OP_RUN) {
 				notifyListeners(new PowerDownAction(run));

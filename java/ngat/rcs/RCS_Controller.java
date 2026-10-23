@@ -2037,7 +2037,7 @@ public class RCS_Controller implements Logging {
 			bootLog.log(1, CLASS, rcsId, "init", "METEO monitoring of WMS is started using CIL");
 
 			// monitor BCS
-			URL bcsUrl = RcsEnvironment.file("/occ/data/cloud.dat").toURI().toURL();
+			URL bcsUrl = new URL(System.getProperty("rcs.cloud.url", RcsEnvironment.file("/occ/data/cloud.dat").toURI().toString()));
 			meteo.startMonitoringBcs(bcsUrl);
 			bootLog.log(1, CLASS, rcsId, "init", "METEO monitoring of external CLOUD sensor is started using: " + bcsUrl);
 
@@ -2444,6 +2444,7 @@ public class RCS_Controller implements Logging {
 
 			// Create state-model, with 30 sec cycle time.
 			tsm = new StandardStateModel(30000L);
+            meteo.addMeteorologyStatusUpdateListener(tsm.getRequiredWeatherInputs());
 
 			// Create thing to recieve reactive triggers and pass these onto
 			// state-model

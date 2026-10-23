@@ -547,6 +547,8 @@ public class InitializeTask extends ParallelTaskImpl implements Logging {
 		doDarkSlide = (config.getProperty("retract.dark.slide") != null);
 		doMirrorOpen = (config.getProperty("open.mirror.cover", "true").equals("true"));
 
+		if (config.getProperty("focus.enabled", "true").equals("false")) doFocus = false;
+
 		doExercise = (config.getProperty("exercise.rotator", "false").equals("true"));
 		doApertures = (config.getProperty("set.apertures", "false").equals("true"));
 

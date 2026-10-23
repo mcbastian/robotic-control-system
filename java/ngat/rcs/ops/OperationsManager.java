@@ -645,6 +645,7 @@ public class OperationsManager extends ControlThread implements TaskManager, Con
 		case OP_STATE_IDLE:
 			switch (event) {
 			case OPER_REQUESTED:
+                if (BoundedOperationsSession.required() && !BoundedOperationsSession.isArmed()) break;
 				initTask = new InitializeTask("OPER_INIT", this);
 				startTask(initTask);
 				switchOpState(OP_STATE_INIT);
@@ -659,9 +660,15 @@ public class OperationsManager extends ControlThread implements TaskManager, Con
 				startTask(finalTask);
 				switchOpState(OP_STATE_FINAL);
 				break;
-			case INIT_DONE:
 			case INIT_FAILED:
-			case INIT_ABORTED:
+            case INIT_ABORTED:
+                if (BoundedOperationsSession.required()) {
+                    BoundedOperationsSession.stop("initialization failed or aborted");
+                    switchOpState(OP_STATE_IDLE);
+                    break;
+                }
+            case INIT_DONE:
+                if (BoundedOperationsSession.required() && !BoundedOperationsSession.isArmed()) { switchOpState(OP_STATE_IDLE); break; }
 				currentModeController = selectOperationsController();
 				// check next MCA and work out timeTillNextMca to pass as
 				// done time..
@@ -671,6 +678,7 @@ public class OperationsManager extends ControlThread implements TaskManager, Con
 				switchOpState(OP_STATE_OP);
 				break;
 			case OPER_FAST_ABORT_REQUESTED:
+                initTask.abort();
 				switchOpState(OP_STATE_IDLE);
 				currentModeController = null;
 				break;
@@ -988,6 +996,13 @@ public class OperationsManager extends ControlThread implements TaskManager, Con
 	}
 
 	/** Returns the operations state. */
+    /** The owned task that must finish cancellation before a bounded re-arm. */
+    public Task getCurrentOperationsTask() {
+        if (opState == OP_STATE_INIT) return initTask;
+        if (opState == OP_STATE_FINAL) return finalTask;
+        return currentModeController;
+    }
+
 	public int getOperationsState() {
 		return opState;
 	}

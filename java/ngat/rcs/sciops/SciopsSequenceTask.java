@@ -85,6 +85,7 @@ public class SciopsSequenceTask extends ParallelTaskImpl {
 		} else if (task instanceof GroupExecutionTask) {
 
 			GroupExecutionTask gxt = (GroupExecutionTask) task;
+            System.err.println("RCS_GROUP_OUTCOME sequence="+name+" group="+gxt.getGroup().getID()+" history="+gxt.getGroup().getHId()+" failed="+task.isFailed());
 
 			// get the execution information
 			// ExecutionResourceBundle erb = gxt.getExecutionResourceBundle();
@@ -129,6 +130,7 @@ public class SciopsSequenceTask extends ParallelTaskImpl {
 	@Override
 	public void onSubTaskAborted(Task task) {
 		super.onSubTaskAborted(task);
+        if(task instanceof GroupExecutionTask) System.err.println("RCS_GROUP_ABORTED sequence="+name+" code="+abortCode+" reason="+abortMessage);
 
 	}
 
@@ -142,6 +144,7 @@ public class SciopsSequenceTask extends ParallelTaskImpl {
 			ScheduleRequestTask srt = (ScheduleRequestTask) task;
 
 			group = srt.getGroup();
+            if(group!=null) System.err.println("RCS_GROUP_SELECTED sequence="+name+" group="+group.getID()+" history="+group.getHId()+" counter="+groupCounter);
 
 			if (group == null) {
 				failed(661402, "No group found in schedule");
@@ -155,6 +158,7 @@ public class SciopsSequenceTask extends ParallelTaskImpl {
 			// Sequence has completed - so it worked ?
 
 			GroupExecutionTask gxt = (GroupExecutionTask) task;
+            System.err.println("RCS_GROUP_OUTCOME sequence="+name+" group="+gxt.getGroup().getID()+" history="+gxt.getGroup().getHId()+" failed="+task.isFailed());
 
 			// get the execution information
 			// ExecutionResourceBundle erb = gxt.getExecutionResourceBundle();
@@ -199,6 +203,7 @@ public class SciopsSequenceTask extends ParallelTaskImpl {
 	@Override
 	public void onCompletion() {
 		super.onCompletion();
+        System.err.println("RCS_SEQUENCE_DONE "+name);
 		taskLog.log(1, CLASS, name, "onInit", "** Completed Test sequence operation");
 	}
 

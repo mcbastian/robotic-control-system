@@ -20,6 +20,7 @@
 package ngat.rcs.sciops;
 
 import ngat.rcs.*;
+import ngat.rcs.ops.BoundedOperationsSession;
 import ngat.rcs.tms.*;
 import ngat.rcs.tms.executive.*;
 import ngat.rcs.tms.manager.*;
@@ -169,6 +170,7 @@ public class SciopsControlAgent extends DefaultModalTask implements Logging {
 	@Override
 	public void onSubTaskFailed(Task task) {
 		super.onSubTaskFailed(task);
+        if (task instanceof SciopsSequenceTask) BoundedOperationsSession.sequenceEnded();
 
 		// just in case a stop-axes failed, we don't really care
 		if (task instanceof StopTask) {
@@ -191,6 +193,7 @@ public class SciopsControlAgent extends DefaultModalTask implements Logging {
 	@Override
 	public void onSubTaskDone(Task task) {
 		super.onSubTaskDone(task);
+        if (task instanceof SciopsSequenceTask) BoundedOperationsSession.sequenceEnded();
 	}
 
 	@Override
@@ -259,12 +262,14 @@ public class SciopsControlAgent extends DefaultModalTask implements Logging {
 	 */
 	@Override
 	public Task getNextJob() {
+        String sessionRequest = BoundedOperationsSession.admit();
+        if (sessionRequest == null) return null;
 		
 		// Check how long till our own timLimit expires, use as disruptor limit.
 		((DefaultMutableAdvancedBookingModel)RCS_Controller.controller.getBookingModel())
 			.addBooking(new XTimePeriod(runStartTime  + timeLimit, runStartTime + timeLimit+3600*1000L));
 
-		SciopsSequenceTask sst = new SciopsSequenceTask(name + "/SS(" + (groupSequenceCount++) + ")", this);
+		SciopsSequenceTask sst = new SciopsSequenceTask(sessionRequest.isEmpty() ? name + "/SS(" + (groupSequenceCount++) + ")" : sessionRequest, this);
 
 		try {
 			groupCounter = puid.increment();
