@@ -13,7 +13,7 @@ public final class BoundedOperationsSession {
     private static String id = "";
     private static int limit, admitted;
     private static long deadline;
-    private static ngat.rcs.tms.Task settling;
+    private static ngat.rcs.tms.Task[] settling = new ngat.rcs.tms.Task[0];
     public static boolean required() { return Boolean.getBoolean("rcs.session.required"); }
     public static synchronized boolean enterEngineering() {
         if (armed || engineeringActive) return false;
@@ -22,7 +22,9 @@ public final class BoundedOperationsSession {
     public static synchronized void leaveEngineering() { engineeringActive=false; }
     public static synchronized boolean isArmed() { return armed; }
     private static boolean settled() {
-        return settling == null || settling.isAborted() || settling.isDone() || settling.isFailed();
+        for (ngat.rcs.tms.Task task: settling)
+            if (task != null && !task.isAborted() && !task.isDone() && !task.isFailed()) return false;
+        return true;
     }
     public static synchronized String status() {
         return "id="+id+" armed="+armed+" admitted="+admitted+" limit="+limit+" settled="+settled();
@@ -55,7 +57,7 @@ public final class BoundedOperationsSession {
     }
     public static synchronized void stop(String reason) {
         if (!armed) return;
-        settling=TaskOperations.getInstance().getOperationsManager().getCurrentOperationsTask();
+        settling=TaskOperations.getInstance().getOperationsManager().getCurrentOperationsTasks();
         armed=false; // close admission before asynchronous cancellation
         System.err.println("RCS_SESSION DISARMED "+status()+" reason="+reason);
         try {

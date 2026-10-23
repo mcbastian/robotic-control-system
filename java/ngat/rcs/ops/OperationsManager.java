@@ -867,7 +867,10 @@ public class OperationsManager extends ControlThread implements TaskManager, Con
 	}
 
 	/** Abort the current operations controller (MCA). */
+	private Task terminatingModeController;
+
 	private void abortOperationsController(int code, String reason) {
+        terminatingModeController = currentModeController;
 		// System.err.println("OPS::Aborting operations controller...");
 		currentModeController.setAbortCode(code, reason);
 		currentModeController.abort();
@@ -996,11 +999,10 @@ public class OperationsManager extends ControlThread implements TaskManager, Con
 	}
 
 	/** Returns the operations state. */
-    /** The owned task that must finish cancellation before a bounded re-arm. */
-    public Task getCurrentOperationsTask() {
-        if (opState == OP_STATE_INIT) return initTask;
-        if (opState == OP_STATE_FINAL) return finalTask;
-        return currentModeController;
+    /** Retain all overlapping owned tasks: finalization can run while the mode
+     * is still aborting. A bounded re-arm must not reset that mode prematurely. */
+    public Task[] getCurrentOperationsTasks() {
+        return new Task[] {initTask, currentModeController, terminatingModeController, finalTask};
     }
 
 	public int getOperationsState() {
