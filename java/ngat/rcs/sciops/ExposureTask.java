@@ -357,8 +357,10 @@ public class ExposureTask extends ParallelTaskImpl {
 		taskLog.log(WARNING, 1, CLASS, name, "onAborting", "Checking instrument details for abort operation: I1=" + instId
 				+ ", I2=" + instId2);
 
-		Abort_Task abortTask = new Abort_Task(name + "/ABORT", this, instId2);
-		taskList.addTask(abortTask);
+        if (!ngat.rcs.ops.BoundedOperationsSession.required() || collator.claimInstrumentAbort(instId2)) {
+            Abort_Task abortTask = new Abort_Task(name + "/ABORT", this, instId2);
+            taskList.addTask(abortTask);
+        }
 
 		// NOTE this might be an ABORT or a FRODO_ABORT depending on what
 		// instrument was involved.

@@ -138,6 +138,17 @@ public class GroupExecutionTask extends ParallelTaskImpl implements AutoguiderSt
 	@Override
 	public void onAborting() {
 		super.onAborting();
+        // A STOP/close can finish the instrument command before a nested
+        // ExposureTask processes its abort flag. Keep cancellation owned here
+        // as well, independently of that callback and without delaying closure.
+        if (ngat.rcs.ops.BoundedOperationsSession.required()) {
+            for (String instrument: collator.getConfiguredInstruments()) {
+                if (collator.claimInstrumentAbort(instrument)) {
+                    taskList.addTask(new Abort_Task(name+"/GROUP_ABORT_"+instrument,this,instrument));
+                    System.err.println("RCS_INSTRUMENT_ABORT_REQUESTED group="+group.getID()+" history="+group.getHId()+" instrument="+instrument);
+                }
+            }
+        }
 		opsLog.log(1, "Aborting Group: Attempting to stop axes");
 		StopTask stopAzTask = new StopTask(name + "/ABORT_STOP_AZM", this, STOP.AZIMUTH);
 		taskList.addTask(stopAzTask);

@@ -127,8 +127,15 @@ public class Abort_Task extends Default_TaskImpl {
 		ABORT abort = new ABORT("ABORT_"+instId);
 		command = abort;
 	}
+        System.err.println("RCS_INSTRUMENT_ABORT_PREPARED task="+name+" instrument="+instId+" command="+command.getId());
+    }
 
-
+    /** The actual wire reply, independently of later task disposal. */
+    @Override
+    public void handleDone(ngat.message.base.COMMAND_DONE response) {
+        System.err.println("RCS_INSTRUMENT_ABORT_RESULT task="+name+" command="+response.getId()+
+            " successful="+response.getSuccessful()+" code="+response.getErrorNum()+" reason="+response.getErrorString());
+        super.handleDone(response);
     }
     
     /** Carry out subclass specific disposal work. 
@@ -140,7 +147,7 @@ public class Abort_Task extends Default_TaskImpl {
 	super.onDisposal();
 
 	logger.log(1, CLASS, name, "onDisposal",
-		   "ICS abort acknowledged");
+		   "ICS abort task disposed: done="+isDone()+", failed="+isFailed()+", aborted="+isAborted());
 	
     }
 

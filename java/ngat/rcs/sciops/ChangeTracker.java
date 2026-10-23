@@ -41,6 +41,16 @@ public class ChangeTracker {
 	/** This should really be an instrument object reference. */
 	private String instrumentName;
 
+    // Shared by branch clones within this group, never across groups.
+    private java.util.Set<String> configuredInstruments = java.util.Collections.synchronizedSet(new java.util.HashSet<String>());
+    private java.util.Set<String> instrumentAborts = java.util.Collections.synchronizedSet(new java.util.HashSet<String>());
+    public java.util.Set<String> getConfiguredInstruments() {
+        synchronized (configuredInstruments) { return new java.util.HashSet<String>(configuredInstruments); }
+    }
+    public boolean claimInstrumentAbort(String instrument) {
+        return instrumentAborts.add(instrument.toUpperCase(java.util.Locale.ROOT));
+    }
+
 	/** True if the autoguider is (or should be) locked. */
 	private IAutoguiderConfig autoguide;
 
@@ -102,6 +112,8 @@ public class ChangeTracker {
 		// e.g. Collator-gr08B.red-tracker
 
 		ChangeTracker newTracker = new ChangeTracker(ident + "." + cloneName);
+        newTracker.configuredInstruments = configuredInstruments;
+        newTracker.instrumentAborts = instrumentAborts;
 		newTracker.setLastConfig(lastConfig);
 		newTracker.setLastTarget(lastTarget);
 		newTracker.setInstrumentName(instrumentName);
@@ -145,6 +157,7 @@ public class ChangeTracker {
 	 */
 	public void setInstrumentName(String instrumentName) {
 		this.instrumentName = instrumentName;
+        if (instrumentName != null) configuredInstruments.add(instrumentName.toUpperCase(java.util.Locale.ROOT));
 		System.err.println("Collator: " + ident + ":setInstrument: " + instrumentName);
 	}
 
